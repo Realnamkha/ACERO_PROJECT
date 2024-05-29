@@ -1,0 +1,12 @@
+document.addEventListener('DOMContentLoaded', () => {
+    const headingButton = document.getElementById("heading-btn");
+  
+    if (headingButton) {
+        headingButton.addEventListener("click", (event) => {
+            event.preventDefault(); // Prevent default behavior (navigation)
+            console.log("Heading button clicked");
+        });
+    } else {
+        console.error("Heading button element not found");
+    }
+});
