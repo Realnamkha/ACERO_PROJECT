@@ -3,7 +3,10 @@
     "version": "1.0",
     "manifest_version": 3,
     "description": "SEOFLY - An extension to help you to improve you on page seo",
-    "permissions": ["scripting"],
+    "permissions": ["scripting",
+    "activeTab",
+    "storage",
+    "tabs"],
     "host_permissions": [
       "<all_urls>"
     ],

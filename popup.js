@@ -1,36 +1,47 @@
-document.getElementById("report-btn").onclick = () => {
-    console.log("Button clicked");
-    chrome.runtime.sendMessage({ method: "clear" }, () => {
-      console.log("Message sent to clear data");
-      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        console.log("Tabs queried:", tabs);
-        chrome.scripting.executeScript(
-          {
-            target: { tabId: tabs[0].id },
-            function: getDocumentInfo,
-          },
-          (results) => {
-            if (chrome.runtime.lastError) {
-              console.error("Error executing content script:", chrome.runtime.lastError.message);
-              document.getElementById("base-url").value = "Error: " + chrome.runtime.lastError.message;
-            } else {
-              console.log("Content script executed successfully", results);
-              chrome.runtime.sendMessage({ method: "get" }, (response) => {
-                if (chrome.runtime.lastError) {
-                  console.error("Error retrieving data:", chrome.runtime.lastError.message);
-                } else {
-                  console.log("Data retrieved successfully");
-                  console.log("Data received:", response);
-                  console.log("Going to dataToPopup");
-                  dataToPopup(response);
-                }
-              });
-            }
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("DOM fully loaded and parsed");
+  
+  // Send a message to clear data
+  chrome.runtime.sendMessage({ method: "clear" }, () => {
+    console.log("Message sent to clear data");
+
+    // Query the active tab in the current window
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      console.log("Tabs queried:", tabs);
+
+      // Execute the content script
+      chrome.scripting.executeScript(
+        {
+          target: { tabId: tabs[0].id },
+          function: getDocumentInfo,
+        },
+        (results) => {
+          if (chrome.runtime.lastError) {
+            console.error("Error executing content script:", chrome.runtime.lastError.message);
+            document.getElementById("base-url").value = "Error: " + chrome.runtime.lastError.message;
+          } else {
+            console.log("Content script executed successfully", results);
+
+            // Send a message to get data
+            chrome.runtime.sendMessage({ method: "get" }, (response) => {
+              if (chrome.runtime.lastError) {
+                console.error("Error retrieving data:", chrome.runtime.lastError.message);
+              } else {
+                console.log("Data retrieved successfully");
+                console.log("Data received:", response);
+                console.log("Going to dataToPopup");
+                
+                // Call the function to handle the retrieved data
+                dataToPopup(response);
+              }
+            });
           }
-        );
-      });
+        }
+      );
     });
-  };
+  });
+});
+
   // popup.js or background script
 
 
@@ -50,8 +61,7 @@ document.getElementById("report-btn").onclick = () => {
 
 
 // Extract links and send them to the background script
-const linksData = getAllLinks();
-chrome.runtime.sendMessage({ method: "linksData", value: linksData });
+
 
 
 
@@ -111,6 +121,21 @@ chrome.runtime.sendMessage({ method: "linksData", value: linksData });
   
       return imageList;
     };
+
+    const getImageSize = (src) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('HEAD', src, false);
+      xhr.send(null);
+  
+      if (xhr.status === 200) {
+        return (xhr.getResponseHeader('Content-Length') / 1024).toFixed(2) + ' KB';
+      } else {
+        return 'N/A';
+      }
+    };
+
+    const imagesData = listImages();
+    chrome.runtime.sendMessage({ method: "imagesData", value: imagesData });
   
     // Function to check alt text presence and content
     const checkAltText = () => {
@@ -124,19 +149,6 @@ chrome.runtime.sendMessage({ method: "linksData", value: linksData });
       });
   
       return missingAlt;
-    };
-  
-    // Function to get image file size
-    const getImageSize = (src) => {
-      const xhr = new XMLHttpRequest();
-      xhr.open('HEAD', src, false);
-      xhr.send(null);
-  
-      if (xhr.status === 200) {
-        return (xhr.getResponseHeader('Content-Length') / 1024).toFixed(2) + ' KB';
-      } else {
-        return 'N/A';
-      }
     };
     const countWords = () => {
         const text = document.body.textContent;
@@ -227,7 +239,7 @@ chrome.runtime.sendMessage({ method: "linksData", value: linksData });
   
     console.log("datatopopup")
   
-    document.getElementById("report-btn").style.display = "none";
+    // document.getElementById("report-btn").style.display = "none";
     // document.getElementById("main-wrapper").style.display = "block";
     // document.getElementById("logo").style.marginTop = "5%";
     // document.getElementById("logo").style.marginBottom = "5%";
