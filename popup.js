@@ -193,7 +193,34 @@ document.addEventListener("DOMContentLoaded", () => {
   
     const headingsData = getAllHeadings();
     chrome.runtime.sendMessage({ method: "headingsData", value: headingsData });
+
   
+  function extractKeywords() {
+      const text = document.body.textContent.toLowerCase(); // Get all text content and convert to lowercase
+      const words = text.match(/\b\w+\b/g); // Extract words using regular expression
+      const wordCounts = {}; // Object to store word counts
+      const totalWords = words.length; // Total number of words
+    
+      // Calculate word counts
+      words.forEach(word => {
+        if (wordCounts[word]) {
+          wordCounts[word]++;
+        } else {
+          wordCounts[word] = 1;
+        }
+      });
+    
+      // Calculate density for each keyword and store word, count, and density in an array
+      const keywords = Object.keys(wordCounts).map(word => ({
+        word: word,
+        count: wordCounts[word],
+        density: (wordCounts[word] / totalWords) * 100 // Density calculation (percentage)
+      }));
+    
+      return keywords;
+    }
+  const keywordsData = extractKeywords();
+  chrome.runtime.sendMessage({ method: "keywordsData", value: keywordsData  });
 
   
     // Collecting document information

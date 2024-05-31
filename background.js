@@ -2,6 +2,7 @@ let value = "";
 let linksData = {};
 let headingsData = {};
 let imagesData = {};
+let keywordsData = {}; // New variable to store keywords data
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   console.log(message.method)
@@ -17,8 +18,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       console.log("Headings data received from heading.js:", headingsData);
       break;
     case "imagesData":
+      // Receive images data from script.js
       imagesData = message.value;
       console.log("Images data received from script.js:", imagesData);
+      break;
+    case "keywordsData": // New case for handling keywords data
+      // Receive keywords data from keyword.js
+      keywordsData = message.value;
+      console.log("Keywords data received from keyword.js:", keywordsData);
       break;
     case "getLinks":
       // Respond to link.js with the stored links data
@@ -39,11 +46,21 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       }
       break;
     case "getImages":
+      // Respond to image.js with the stored images data
       if (Object.keys(imagesData).length > 0) {
         sendResponse(imagesData);
         console.log("Images data sent to image.js:", imagesData);
       } else {
         console.error("Error: Images data not available.");
+      }
+      break;
+    case "getKeywords": // New case for responding to keyword.js
+      // Respond to keyword.js with the stored keywords data
+      if (Object.keys(keywordsData).length > 0) {
+        sendResponse(keywordsData);
+        console.log("Keywords data sent to keyword.js:", keywordsData);
+      } else {
+        console.error("Error: Keywords data not available.");
       }
       break;
     case "set":
