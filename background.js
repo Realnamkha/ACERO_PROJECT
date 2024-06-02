@@ -2,7 +2,9 @@ let value = "";
 let linksData = {};
 let headingsData = {};
 let imagesData = {};
-let keywordsData = {}; // New variable to store keywords data
+let keywordsData = {}; 
+let schema = {};
+let openGraphData = {}; // New variable for Open Graph data
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   console.log(message.method)
@@ -22,10 +24,20 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       imagesData = message.value;
       console.log("Images data received from script.js:", imagesData);
       break;
-    case "keywordsData": // New case for handling keywords data
+    case "keywordsData":
       // Receive keywords data from keyword.js
       keywordsData = message.value;
       console.log("Keywords data received from keyword.js:", keywordsData);
+      break;
+    case "schemaTypesData":
+      // Receive schema types data from content script
+      schema = message.value;
+      console.log("Schema types data received from content script:", schema);
+      break;
+    case "openGraphData": // New case for handling Open Graph data
+      // Receive Open Graph data from content script
+      openGraphData = message.value;
+      console.log("Open Graph data received from content script:", openGraphData);
       break;
     case "getLinks":
       // Respond to link.js with the stored links data
@@ -54,7 +66,25 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         console.error("Error: Images data not available.");
       }
       break;
-    case "getKeywords": // New case for responding to keyword.js
+    case "getSchema":
+        // Respond to image.js with the stored schema data
+        if (Object.keys(schema).length > 0) {
+          sendResponse(schema);
+          console.log("Schema data sent to image.js:", schema);
+        } else {
+          console.error("Error: Schema data not available.");
+        }
+        break;
+    case "getOpenGraph": // New case for responding to opengraph.js
+      // Respond to opengraph.js with the stored Open Graph data
+      if (Object.keys(openGraphData).length > 0) {
+        sendResponse(openGraphData);
+        console.log("Open Graph data sent to opengraph.js:", openGraphData);
+      } else {
+        console.error("Error: Open Graph data not available.");
+      }
+      break;
+    case "getKeywords":
       // Respond to keyword.js with the stored keywords data
       if (Object.keys(keywordsData).length > 0) {
         sendResponse(keywordsData);

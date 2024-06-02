@@ -222,6 +222,245 @@ document.addEventListener("DOMContentLoaded", () => {
   const keywordsData = extractKeywords();
   chrome.runtime.sendMessage({ method: "keywordsData", value: keywordsData  });
 
+
+  const xmlSitemapExists = async() => {
+    try {
+      let xmlRes = await fetch('/sitemap.xml');
+      let xmlSitemap = xmlRes.status === 404 ? false : true;
+      return xmlSitemap;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  const fetchRobotsTxt = async () => {
+    try {
+      // Fetch the robots.txt file from the root directory of the website
+      let response = await fetch('/robots.txt');
+      
+      // Check the response status
+      if (response.status === 404) {
+        // If the status is 404 (not found), return an object indicating the file does not exist
+        return { exists: false, content: null };
+      } else {
+        // If the file exists, read the content
+        let content = await response.text();
+        // Return an object indicating the file exists and include its content
+        return { exists: true, content: content };
+      }
+    } catch (error) {
+      // If there's any error during the fetch, return an object indicating the file does not exist
+      return { exists: false, content: null };
+    }
+  }
+
+  
+  const getCanonicalUrl = () => {
+    try {
+      let canonicalUrl = undefined;
+      let nodeList = document.getElementsByTagName("link");
+      for (let i = 0; i < nodeList.length; i++)
+      {
+          if((nodeList[i].getAttribute("rel") == "canonical"))
+          {
+            canonicalUrl = nodeList[i].getAttribute("href");
+          }
+      }
+    
+      if(canonicalUrl) {
+        return canonicalUrl;
+      } else {
+        return false;
+      }
+    } catch (error) {
+      return false;
+    }
+  }
+
+  const getNoindexTag = () => {
+    try {
+      let robotsTagExists = document.getElementsByTagName('meta').robots.content
+      if(robotsTagExists) {
+        let included = content.includes('noindex');
+
+        if(included) {
+          return true
+        } else {
+          return false
+        }
+      } else {
+        return false
+      }
+    } catch(error) {
+      return false
+    } 
+  }
+
+  const getSSL = () => {
+    try {
+      let content = document.location.protocol
+      let included = content.includes('https');
+
+      if(included) return true;
+      else return false;
+    } catch (error) {
+      return false;
+    }
+  }
+  const listSchemas = async () => {
+    try {
+      // Get the current page URL
+      let url = window.location.href;
+  
+      // Fetch the HTML content of the current URL
+      let response = await fetch(url);
+      let html = await response.text();
+  
+      // Create a temporary DOM element to parse the HTML
+      let parser = new DOMParser();
+      let doc = parser.parseFromString(html, 'text/html');
+  
+      // Find all script tags with type "application/ld+json"
+      let scripts = doc.querySelectorAll('script[type="application/ld+json"]');
+  
+      // Array to store the detected schema types
+      let schemas = [];
+  
+      // Function to recursively extract @type values and details
+      const extractTypes = (json) => {
+        if (Array.isArray(json)) {
+          json.forEach(item => extractTypes(item));
+        } else if (typeof json === 'object') {
+          schemas.push(json);
+          Object.values(json).forEach(value => {
+            if (typeof value === 'object' || Array.isArray(value)) {
+              extractTypes(value);
+            }
+          });
+        }
+      };
+  
+      scripts.forEach(script => {
+        // Parse the JSON content
+        let jsonContent;
+        try {
+          jsonContent = JSON.parse(script.textContent);
+        } catch (error) {
+          console.error('Error parsing JSON-LD:', error);
+          return;
+        }
+        extractTypes(jsonContent);
+      });
+  
+      // Send the schema types data to the background script
+      chrome.runtime.sendMessage({ method: "schemaTypesData", value: schemas }, (response) => {
+        if (chrome.runtime.lastError) {
+          console.error("Error sending schema types data:", chrome.runtime.lastError.message);
+        } else {
+          console.log("Schema types data sent successfully:", schemas);
+        }
+      });
+  
+      // Return or log the list of schema types
+      return schemas;
+    } catch (error) {
+      console.error('Error fetching or parsing schema:', error);
+      return [];
+    }
+  };
+
+
+  // Function to check for Open Graph tags and display their details
+// Function to check for Open Graph tags and send their details
+
+const checkOpenGraphTags = () => {
+  // Define an object of Open Graph properties to check for
+  const ogProperties = {
+    'og:title': null,
+    'og:type': null,
+    'og:image': null,
+    'og:url': null,
+    'og:description': null,
+    'og:site_name': null,
+    'og:locale': null,
+    'og:video': null,
+    'og:audio': null,
+    'og:determiner': null,
+    'og:updated_time': null,
+    'twitter:card': null,
+    'twitter:title': null,
+    'twitter:description': null,
+    'twitter:image': null
+    // Add more Open Graph properties or specific social media tags as needed
+  };
+
+  // Initialize an object to store the Open Graph tags found
+  const openGraphData = {};
+
+  // Loop through each Open Graph property
+  for (const property in ogProperties) {
+    // Find the meta tag with the given property
+    const metaTag = document.querySelector(`meta[property='${property}']`) || 
+                    document.querySelector(`meta[name='${property}']`);
+    if (metaTag) {
+      // If the meta tag exists, add its content to the openGraphData object
+      openGraphData[property] = metaTag.getAttribute('content');
+    }
+  }
+
+  // Send the Open Graph data to the background script or handle it locally
+  // Based on your application's requirements
+  chrome.runtime.sendMessage({ method: "openGraphData", value: openGraphData }, (response) => {
+    if (chrome.runtime.lastError) {
+      console.error("Error sending Open Graph data:", chrome.runtime.lastError.message);
+    } else {
+      console.log("Open Graph data sent successfully:", openGraphData);
+    }
+  });
+
+  return openGraphData;
+};
+
+// const checkOpenGraphTags = () => {
+//   // Define an array of Open Graph properties to check for
+//   const ogProperties = [
+//       'og:title', 'og:type', 'og:image', 'og:url', 'og:description',
+//       'og:site_name', 'og:locale', 'og:video', 'og:audio',
+//       'og:determiner', 'og:updated_time'
+//   ];
+
+//   // Initialize an object to store the Open Graph tags found
+//   const openGraphData = {};
+
+//   // Loop through each Open Graph property
+//   ogProperties.forEach(property => {
+//       // Find the meta tag with the given property
+//       const metaTag = document.querySelector(`meta[property='${property}']`);
+//       if (metaTag) {
+//           // If the meta tag exists, add its content to the openGraphData object
+//           openGraphData[property] = metaTag.getAttribute('content');
+//       }
+//   });
+
+//   // Send the Open Graph data to the background script
+//   chrome.runtime.sendMessage({ method: "openGraphData", value: openGraphData }, (response) => {
+//     if (chrome.runtime.lastError) {
+//       console.error("Error sending Open Graph data:", chrome.runtime.lastError.message);
+//     } else {
+//       console.log("Open Graph data sent successfully:", openGraphData);
+//     }
+//   });
+
+//   return openGraphData;
+// };
+
+
+  
+  
+  // Call the listSchemas function
+  listSchemas();
+  checkOpenGraphTags();
+  
   
     // Collecting document information
     let performanceObject = getPerformance();
@@ -239,10 +478,16 @@ document.addEventListener("DOMContentLoaded", () => {
     let domain = document.domain;
     let word_count = countWords()
     let links = getAllLinks()
+    let xmlSitemap = xmlSitemapExists();
+    let robotsTxt = fetchRobotsTxt();
+    let canonicalUrl = getCanonicalUrl();
+    let noindexTag = getNoindexTag();
+    let ssl = getSSL();
+
   
     let keyPoints = {
       performanceObject, title, description, h1Count, h2Count, h3Count, h4Count, h5Count, h6Count,
-      images, alt_images, domain,word_count, links,
+      images, alt_images, domain,word_count, links,xmlSitemap, robotsTxt,canonicalUrl,noindexTag,ssl
     };
   
     let dataObject = { baseUrl, keyPoints };
@@ -336,31 +581,64 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("site-headings").innerHTML = "Oops, your webpage has not any h1 tag";
       document.getElementById('site-headings').classList.add("warning-mark")
     }
-  
-    // Images
-    // document.getElementById("site-alt-text").innerHTML = keyPoints.images.totalImages;
-    // if(keyPoints.images.imagesWithoutAlt.length > 0) {
-    //   document.getElementById('images-withuot-alt').classList.add("error-mark")
-    //   document.getElementById("images-withuot-alt").innerHTML = keyPoints.images.imagesWithoutAlt.length + " ALT attributes are empty or missing.";
-  
-    //   const div = document.getElementById('images-withuot-alt');
-    //   const ul = document.createElement("ul");
-    //   ul.setAttribute("id", "image-list");
-  
-    //   for (let i = 0; i < keyPoints.images.imagesWithoutAlt.length; i++) {
-    //     const li = document.createElement("li");
-    //     li.innerHTML = keyPoints.images.imagesWithoutAlt[i];
-    //     li.setAttribute("class", "image-list-item")
-    //     ul.appendChild(li);
-    //   }
-  
-    //   div.appendChild(ul);
-  
-    // } else {
-    //   score = scorePerSuccess + score;
-    //   document.getElementById('images-withuot-alt').classList.add("success-mark")
-    //   document.getElementById("images-withuot-alt").innerHTML =  "Good, Every images have alt attributes.";
-    // }
+
+
+      // XML Sitemap
+  if (keyPoints.xmlSitemap) {
+    score = scorePerSuccess + score;
+    document.getElementById('site-xml').classList.add("success-mark")
+    document.getElementById("site-xml").innerHTML = "Good, you have XML Sitemap file";
+  } else {
+    document.getElementById('site-xml').classList.add("error-mark")
+    document.getElementById("site-xml").innerHTML = "Oops, you have not XML Sitemap file";
+  }
+
+  // Robots.txt
+  if (keyPoints.robotsTxt) {
+    score = scorePerSuccess + score;
+    document.getElementById('site-robots').classList.add("success-mark")
+    document.getElementById("site-robots").innerHTML = "Good, you have Robots.txt file";
+  } else {
+    document.getElementById('site-robots').classList.add("error-mark")
+    document.getElementById("site-robots").innerHTML = "Oops, you have not Robots.txt file";
+  }
+
+  if (keyPoints.canonicalUrl) {
+    score = scorePerSuccess + score;
+    document.getElementById("site-canonical").classList.add("success-mark")
+    document.getElementById("site-canonical").innerHTML = "Your page is using the Canonical Tag.";
+    let canonical = document.getElementById("site-canonical")
+    let div = document.createElement("a");
+    div.setAttribute("id", "site-canonical-url");
+    div.setAttribute("class", "card-value");
+    div.href = keyPoints.canonicalUrl;
+    div.innerHTML = keyPoints.canonicalUrl;
+
+    canonical.parentNode.insertBefore(div, canonical.nextSibling);
+  } else {
+    document.getElementById("site-canonical").classList.add("error-mark")
+    document.getElementById("site-canonical").innerHTML = "Your page is not using the Canonical Tag.";
+  }
+
+  // NoIndex Tag
+  if (!keyPoints.noindexTag) {
+    score = scorePerSuccess + score;
+    document.getElementById("site-noindex").classList.add("success-mark");
+    document.getElementById("site-noindex").innerHTML = "Your page is not using the Noindex Tag which prevents indexing.";
+  } else {
+    document.getElementById("site-noindex").classList.add("error-mark");
+    document.getElementById("site-noindex").innerHTML = "Your page is using the Noindex Tag which prevents indexing.";
+  }
+
+  // SSL Enabled
+  if (keyPoints.ssl) {
+    score = scorePerSuccess + score;
+    document.getElementById("site-ssl").classList.add("success-mark")
+    document.getElementById("site-ssl").innerHTML = "Greate, Your website has SSL enabled.";
+  } else {
+    document.getElementById("site-ssl").classList.add("error-mark")
+    document.getElementById("site-ssl").innerHTML = "Oops, Your website has not been SSL enabled.";
+  }
   
 
 
@@ -380,21 +658,3 @@ document.addEventListener("DOMContentLoaded", () => {
   
     scoreProgressBar(score);
   }
-  function getHeadingInfo() {
-    console.log("getHeadingInfo");
-
-    // Function to get all headings on the page
-    const getAllHeadings = () => {
-        const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
-        return Array.from(headings).map(heading => ({
-            tag: heading.tagName,
-            text: heading.textContent.trim(),
-        }));
-    };
-
-    // Return the results as an object
-    return {
-        headings: getAllHeadings(),
-        // other properties...
-    };
-}
