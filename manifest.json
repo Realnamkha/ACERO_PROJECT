@@ -1,8 +1,8 @@
 {
     "name": "ACERO",
-    "version": "1.0",
+    "version": "2.0",
     "manifest_version": 3,
-    "description": "SEOFLY - An extension to help you to improve you on page seo",
+    "description": "Acero_SEO - An extension to help you to improve you on page seo",
     "permissions": ["scripting",
     "activeTab",
     "storage",
@@ -14,16 +14,16 @@
       "service_worker": "background.js"
     },
     "action": {
-      "default_title": "SEOFLY",
+      "default_title": "ACERO",
       "default_popup": "popup.html",
       "default_icon": {
-        "32": "/assets/logo.png"
+        "32": "/assets/logo.svg"
       }
     },
     "icons": {
-      "16": "/assets/logo.png",
-      "32": "/assets/logo.png",
-      "48": "/assets/logo.png",
-      "128": "/assets/logo.png"
+      "16": "/assets/logo.svg",
+      "32": "/assets/logo.svg",
+      "48": "/assets/logo.svg",
+      "128": "/assets/logo.svg"
     }
   }

@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Navbar Example</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="footer.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
     .grid {
         display: grid;
@@ -30,10 +32,12 @@
     .card-title {
         font-weight: bold;
         font-size: 16px;
+        color: #27187E;
     }
     .card-value {
     max-width: 300px; /* Set the maximum width */
     overflow: auto;
+    color: #27187E;
     }
     .grid-item > div {
     border-bottom: 1px solid #d1d5db; /* Add border line between items */
@@ -47,22 +51,24 @@
     </style>
 </head>
 <body>
-<nav class="navbar">
-    <div class="container">
-        <a href="https://flowbite.com/" class="logo">
-            <img src="https://flowbite.com/docs/images/logo.svg" class="logo-img" alt="Flowbite Logo" />
-            <span class="logo-text">Acero</span>
-        </a>
+    <nav class="navbar">
+        <div class="logo">
+            <a href="https://flowbite.com/">
+                <img src="image.png" class="logo-img" alt="Flowbite Logo" />
+            </a>
+        </div>
         <div class="navbar-menu" id="navbarMenu">
             <ul class="navbar-list">
-                <li class="navbar-item"><a href="popup.html" class="navbar-link active">Acero</a></li>
-                <li class="navbar-item"><a href="heading.html" id="heading-btn" class="navbar-link">Headings</a></li>
-                <li class="navbar-item"><a href="links.html" class="navbar-link">Links</a></li>
-                <li class="navbar-item"><a href="images.html" class="navbar-link">Images</a></li>
+                <li class="navbar-item"><a href="popup.html" class="navbar-link"><i class="fas fa-chart-line"></i> Summary</a></li>
+                <li class="navbar-item"><a href="heading.html" id="heading-btn" class="navbar-link"><i class="fas fa-heading"></i> Headings</a></li>
+                <li class="navbar-item"><a href="links.html" class="navbar-link"><i class="fas fa-link"></i> Links</a></li>
+                <li class="navbar-item"><a href="images.html" class="navbar-link"><i class="fas fa-image"></i> Images</a></li>
+                <li class="navbar-item"><a href="schema.html" class="navbar-link"><i class="fas fa-code"></i> Schema</a></li>
+                <li class="navbar-item"><a href="social.html" class="navbar-link"><i class="fas fa-share-alt"></i> Social</a></li>
+                <li class="navbar-item"><a href="keywords.html" class="navbar-link"><i class="fas fa-key"></i> Keywords</a></li>
             </ul>
         </div>
-    </div>
-</nav>
+    </nav>
 <!-- <div id="report-btn">Generate Report</div> -->
 <div class="grid full-width">
     <div class="grid-item full-width ">
@@ -81,6 +87,11 @@
     </div>
 
 </div>
+<footer>
+    <div class="footerBottom">
+        <p>Copyright &copy;2024; Designed by Acero</p>
+    </div>
+</footer>
 </body>
 <script src="keyword.js"></script>
 </html>

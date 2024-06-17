@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("Error retrieving images:", chrome.runtime.lastError.message);
         } else {
             console.log("Images retrieved successfully:", response);
+            console.log(response)
             displayImages(response);
         }
     });
@@ -25,11 +26,13 @@ function displayImages(images) {
         const imgTitleElement = document.createElement('div');
         imgTitleElement.classList.add('col-6', 'card-value');
         imgTitleElement.textContent = `Image ${index + 1}: ${image.src}`;
+        imgTitleElement.style.color = "#27187E"
 
         // Create image size element
         const imgSizeElement = document.createElement('div');
         imgSizeElement.classList.add('col-6', 'card-value');
         imgSizeElement.textContent = `Size: ${image.size}`;
+        imgSizeElement.style.color = "#27187E"
 
         // Append image title and image size elements to inner container
         innerContainer.appendChild(imgTitleElement);

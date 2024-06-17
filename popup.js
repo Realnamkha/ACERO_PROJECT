@@ -41,32 +41,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 });
-
-  // popup.js or background script
-
-
-//   document.addEventListener('DOMContentLoaded', () => {
-//     const headingButton = document.getElementById("heading-btn");
-  
-//     if (headingButton) {
-//         headingButton.addEventListener("click", (event) => {
-//             // event.preventDefault(); // Prevent default behavior (navigation)
-//             console.log("Heading button clicked");
-//         });
-//     } else {
-//         console.error("Heading button element not found");
-//     }
-// });
-
-
-
-// Extract links and send them to the background script
-
-
-
-
-
-  
   
   async function getDocumentInfo() {
     console.log("getDocumentInfo");
@@ -107,35 +81,50 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   
     // Function to list all images on the page
-    const listImages = () => {
-      const images = document.querySelectorAll('img');
-      const imageList = [];
-  
-      images.forEach(image => {
-        imageList.push({
-          src: image.src,
-          alt: image.alt,
-          size: getImageSize(image.src)
-        });
-      });
-  
-      return imageList;
-    };
-
-    const getImageSize = (src) => {
-      const xhr = new XMLHttpRequest();
-      xhr.open('HEAD', src, false);
-      xhr.send(null);
-  
-      if (xhr.status === 200) {
-        return (xhr.getResponseHeader('Content-Length') / 1024).toFixed(2) + ' KB';
-      } else {
+    const getImageSize = async (src) => {
+      try {
+        const response = await fetch(src, { method: 'HEAD' });
+        if (response.ok) {
+          const contentLength = response.headers.get('Content-Length');
+          if (contentLength) {
+            return (contentLength / 1024).toFixed(2) + ' KB';
+          } else {
+            return 'N/A';
+          }
+        } else {
+          return 'N/A';
+        }
+      } catch (error) {
+        console.error(`Error fetching image size for ${src}:`, error);
         return 'N/A';
       }
     };
-
-    const imagesData = listImages();
-    chrome.runtime.sendMessage({ method: "imagesData", value: imagesData });
+    
+    const listImages = async () => {
+      const images = document.querySelectorAll('img');
+      const imageListPromises = [];
+    
+      images.forEach(image => {
+        const imagePromise = getImageSize(image.src).then(size => ({
+          src: image.src,
+          alt: image.alt,
+          size: size
+        }));
+        imageListPromises.push(imagePromise);
+      });
+    
+      const imageList = await Promise.all(imageListPromises);
+      return imageList;
+    };
+    
+    const sendImagesData = async () => {
+      const imagesData = await listImages();
+      chrome.runtime.sendMessage({ method: "imagesData", value: imagesData });
+    };
+    
+    // Call the function to send image data
+    sendImagesData();
+    
   
     // Function to check alt text presence and content
     const checkAltText = () => {
@@ -157,30 +146,34 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     function getAllLinks() {
-        const currentDomain = window.location.hostname;
-        const links = document.querySelectorAll('a');
-        const internalLinks = [];
-        const externalLinks = [];
-    
-        links.forEach(link => {
-            const href = link.href;
-            if (href.startsWith('http') || href.startsWith('//')) {
-                // External link
-                if (!href.includes(currentDomain)) {
-                    externalLinks.push(href);
-                } else {
-                    internalLinks.push(href);
-                }
-            } else {
-                // Internal link (relative URL)
-                internalLinks.push(href);
-            }
-        });
-    
-        return { internalLinks, externalLinks };
-    }
-    const linksData = getAllLinks();
-    chrome.runtime.sendMessage({ method: "linksData", value: linksData });
+      const currentDomain = window.location.hostname;
+      const links = document.querySelectorAll('a');
+      const internalLinks = [];
+      const externalLinks = [];
+      
+      links.forEach(link => {
+          const href = link.href;
+          const anchorText = link.textContent.trim(); // Capture the anchor text
+          
+          if (href.startsWith('http') || href.startsWith('//')) {
+              // External link
+              if (!href.includes(currentDomain)) {
+                  externalLinks.push({ href, anchorText });
+              } else {
+                  internalLinks.push({ href, anchorText });
+              }
+          } else {
+              // Internal link (relative URL)
+              internalLinks.push({ href, anchorText });
+          }
+      });
+      
+      return { internalLinks, externalLinks };
+  }
+  
+  const linksData = getAllLinks();
+  chrome.runtime.sendMessage({ method: "linksData", value: linksData });
+  
 
     function getAllHeadings() {
       const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
@@ -195,32 +188,37 @@ document.addEventListener("DOMContentLoaded", () => {
     chrome.runtime.sendMessage({ method: "headingsData", value: headingsData });
 
   
-  function extractKeywords() {
+    function extractKeywords() {
       const text = document.body.textContent.toLowerCase(); // Get all text content and convert to lowercase
       const words = text.match(/\b\w+\b/g); // Extract words using regular expression
       const wordCounts = {}; // Object to store word counts
-      const totalWords = words.length; // Total number of words
-    
+  
       // Calculate word counts
       words.forEach(word => {
-        if (wordCounts[word]) {
-          wordCounts[word]++;
-        } else {
-          wordCounts[word] = 1;
-        }
+          if (wordCounts[word]) {
+              wordCounts[word]++;
+          } else {
+              wordCounts[word] = 1;
+          }
       });
-    
+  
       // Calculate density for each keyword and store word, count, and density in an array
       const keywords = Object.keys(wordCounts).map(word => ({
-        word: word,
-        count: wordCounts[word],
-        density: (wordCounts[word] / totalWords) * 100 // Density calculation (percentage)
+          word: word,
+          count: wordCounts[word],
+          density: (wordCounts[word] / words.length) * 100 // Density calculation (percentage)
       }));
-    
-      return keywords;
-    }
+  
+      // Sort keywords based on count in descending order
+      keywords.sort((a, b) => b.count - a.count);
+  
+      // Return only the top 100 keywords
+      return keywords.slice(0, 100);
+  }
+  
   const keywordsData = extractKeywords();
-  chrome.runtime.sendMessage({ method: "keywordsData", value: keywordsData  });
+  chrome.runtime.sendMessage({ method: "keywordsData", value: keywordsData });
+  
 
 
   const xmlSitemapExists = async() => {
@@ -372,44 +370,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Function to check for Open Graph tags and display their details
 // Function to check for Open Graph tags and send their details
-
 const checkOpenGraphTags = () => {
-  // Define an object of Open Graph properties to check for
-  const ogProperties = {
-    'og:title': null,
-    'og:type': null,
-    'og:image': null,
-    'og:url': null,
-    'og:description': null,
-    'og:site_name': null,
-    'og:locale': null,
-    'og:video': null,
-    'og:audio': null,
-    'og:determiner': null,
-    'og:updated_time': null,
-    'twitter:card': null,
-    'twitter:title': null,
-    'twitter:description': null,
-    'twitter:image': null
-    // Add more Open Graph properties or specific social media tags as needed
-  };
+  // Define an array of Open Graph properties to check for
+  const ogProperties = [
+      'og:title', 'og:type', 'og:image', 'og:url', 'og:description',
+      'og:site_name', 'og:locale', 'og:video', 'og:audio',
+      'og:determiner', 'og:updated_time'
+  ];
 
   // Initialize an object to store the Open Graph tags found
   const openGraphData = {};
 
   // Loop through each Open Graph property
-  for (const property in ogProperties) {
-    // Find the meta tag with the given property
-    const metaTag = document.querySelector(`meta[property='${property}']`) || 
-                    document.querySelector(`meta[name='${property}']`);
-    if (metaTag) {
-      // If the meta tag exists, add its content to the openGraphData object
-      openGraphData[property] = metaTag.getAttribute('content');
-    }
-  }
+  ogProperties.forEach(property => {
+      // Find the meta tag with the given property
+      const metaTag = document.querySelector(`meta[property='${property}']`);
+      if (metaTag) {
+          // If the meta tag exists, add its content to the openGraphData object
+          openGraphData[property] = metaTag.getAttribute('content');
+      }
+  });
 
-  // Send the Open Graph data to the background script or handle it locally
-  // Based on your application's requirements
+  // Send the Open Graph data to the background script
   chrome.runtime.sendMessage({ method: "openGraphData", value: openGraphData }, (response) => {
     if (chrome.runtime.lastError) {
       console.error("Error sending Open Graph data:", chrome.runtime.lastError.message);
@@ -420,39 +402,6 @@ const checkOpenGraphTags = () => {
 
   return openGraphData;
 };
-
-// const checkOpenGraphTags = () => {
-//   // Define an array of Open Graph properties to check for
-//   const ogProperties = [
-//       'og:title', 'og:type', 'og:image', 'og:url', 'og:description',
-//       'og:site_name', 'og:locale', 'og:video', 'og:audio',
-//       'og:determiner', 'og:updated_time'
-//   ];
-
-//   // Initialize an object to store the Open Graph tags found
-//   const openGraphData = {};
-
-//   // Loop through each Open Graph property
-//   ogProperties.forEach(property => {
-//       // Find the meta tag with the given property
-//       const metaTag = document.querySelector(`meta[property='${property}']`);
-//       if (metaTag) {
-//           // If the meta tag exists, add its content to the openGraphData object
-//           openGraphData[property] = metaTag.getAttribute('content');
-//       }
-//   });
-
-//   // Send the Open Graph data to the background script
-//   chrome.runtime.sendMessage({ method: "openGraphData", value: openGraphData }, (response) => {
-//     if (chrome.runtime.lastError) {
-//       console.error("Error sending Open Graph data:", chrome.runtime.lastError.message);
-//     } else {
-//       console.log("Open Graph data sent successfully:", openGraphData);
-//     }
-//   });
-
-//   return openGraphData;
-// };
 
 
   
@@ -482,11 +431,12 @@ const checkOpenGraphTags = () => {
     let robotsTxt = fetchRobotsTxt();
     let canonicalUrl = getCanonicalUrl();
     let noindexTag = getNoindexTag();
+    let keywords = extractKeywords()
     let ssl = getSSL();
 
   
     let keyPoints = {
-      performanceObject, title, description, h1Count, h2Count, h3Count, h4Count, h5Count, h6Count,
+      performanceObject, title, description, h1Count, h2Count, h3Count, h4Count, h5Count, h6Count,keywords,
       images, alt_images, domain,word_count, links,xmlSitemap, robotsTxt,canonicalUrl,noindexTag,ssl
     };
   
@@ -506,58 +456,62 @@ const checkOpenGraphTags = () => {
 
     const { keyPoints, baseUrl } = response.value;
   
-    let score = 0
-    let scorePerSuccess = 7.14;
-  
-    console.log("datatopopup")
-  
-    // document.getElementById("report-btn").style.display = "none";
-    // document.getElementById("main-wrapper").style.display = "block";
-    // document.getElementById("logo").style.marginTop = "5%";
-    // document.getElementById("logo").style.marginBottom = "5%";
-  
-    document.getElementById("base-url").innerHTML = baseUrl;
-  
-    // Title
-    document.getElementById("site-title").innerHTML = keyPoints.title;
-    document.getElementById("title-length").innerHTML = "<b>Length : </b>" + keyPoints.title.length;
-    if(keyPoints.title.length > 10 && keyPoints.title.length < 70) {
-      score = scorePerSuccess + score;
-      document.getElementById('site-title').classList.add("success-mark")
-    } else {
-      document.getElementById('site-title').classList.add("error-mark")
-    }
-  
-    // Description
-    if(keyPoints.description) {
-      document.getElementById("site-description").innerHTML = keyPoints.description;
-      document.getElementById("description-length").innerHTML = "<b>Length : </b>" + keyPoints.description.length;
-      if(keyPoints.description.length > 70 && keyPoints.description.length < 320) {
-        score = scorePerSuccess + score;
-        document.getElementById('site-description').classList.add("success-mark")
-      } else {
-        document.getElementById('site-description').classList.add("warning-mark")
-      }
-    } else {
-      document.getElementById("site-description").innerHTML = "Oops, your webpage has not any meta description";
-      document.getElementById('site-description').classList.add("error-mark")
-    }
+    let score = 0;
+let scorePerSuccess = 1;
 
-    // Word Count
+console.log("datatopopup");
 
-    if(keyPoints.word_count) {
-        document.getElementById("title-word-count").innerHTML = keyPoints.word_count;
+document.getElementById("base-url").innerHTML = baseUrl;
+
+// Title
+document.getElementById("site-title").innerHTML = keyPoints.title;
+document.getElementById("title-length").innerHTML = "<b>Length : </b>" + keyPoints.title.length;
+if (keyPoints.title.length > 10 && keyPoints.title.length < 70) {
+    score += scorePerSuccess;
+    document.getElementById('site-title').classList.add("success-mark");
+} else {
+    document.getElementById('site-title').classList.add("error-mark");
+}
+
+// Description
+if (keyPoints.description) {
+    document.getElementById("site-description").innerHTML = keyPoints.description;
+    document.getElementById("description-length").innerHTML = "<b>Length : </b>" + keyPoints.description.length;
+    if (keyPoints.description.length > 70 && keyPoints.description.length < 320) {
+        score += scorePerSuccess;
+        document.getElementById('site-description').classList.add("success-mark");
+    } else {
+        document.getElementById('site-description').classList.add("warning-mark");
     }
-    if (keyPoints.links) {
-        console.log("LINKS FUNCTION EXECUTED")
-        const { internalLinks, externalLinks } = keyPoints.links;
-    
-        document.getElementById('internal-links').textContent = internalLinks.length;
-        document.getElementById('external-links').textContent = externalLinks.length;
+} else {
+    document.getElementById("site-description").innerHTML = "Oops, your webpage has not any meta description";
+    document.getElementById('site-description').classList.add("error-mark");
+}
+
+// Word Count
+if (keyPoints.word_count) {
+    document.getElementById("title-word-count").innerHTML = keyPoints.word_count;
+    if (keyPoints.word_count >= 300) {
+        score += scorePerSuccess;
     }
-    if (keyPoints.images) {
-        document.getElementById('total-images').textContent = keyPoints.images.length;
+}
+
+// Links
+if (keyPoints.links) {
+    console.log("LINKS FUNCTION EXECUTED");
+    const { internalLinks, externalLinks } = keyPoints.links;
+
+    document.getElementById('internal-links').textContent = internalLinks.length;
+    document.getElementById('external-links').textContent = externalLinks.length;
+
+    if (internalLinks.length > 3) {
+        score += scorePerSuccess;
     }
+}
+
+    // if (keyPoints.images) {
+    //     document.getElementById('total-images').textContent = keyPoints.images.length;
+    // }
 
     if (keyPoints.alt_images) {
         document.getElementById('img-alt').textContent = keyPoints.alt_images.length;
@@ -585,7 +539,6 @@ const checkOpenGraphTags = () => {
 
       // XML Sitemap
   if (keyPoints.xmlSitemap) {
-    score = scorePerSuccess + score;
     document.getElementById('site-xml').classList.add("success-mark")
     document.getElementById("site-xml").innerHTML = "Good, you have XML Sitemap file";
   } else {
@@ -595,7 +548,6 @@ const checkOpenGraphTags = () => {
 
   // Robots.txt
   if (keyPoints.robotsTxt) {
-    score = scorePerSuccess + score;
     document.getElementById('site-robots').classList.add("success-mark")
     document.getElementById("site-robots").innerHTML = "Good, you have Robots.txt file";
   } else {
@@ -604,7 +556,6 @@ const checkOpenGraphTags = () => {
   }
 
   if (keyPoints.canonicalUrl) {
-    score = scorePerSuccess + score;
     document.getElementById("site-canonical").classList.add("success-mark")
     document.getElementById("site-canonical").innerHTML = "Your page is using the Canonical Tag.";
     let canonical = document.getElementById("site-canonical")
@@ -622,7 +573,6 @@ const checkOpenGraphTags = () => {
 
   // NoIndex Tag
   if (!keyPoints.noindexTag) {
-    score = scorePerSuccess + score;
     document.getElementById("site-noindex").classList.add("success-mark");
     document.getElementById("site-noindex").innerHTML = "Your page is not using the Noindex Tag which prevents indexing.";
   } else {
@@ -632,7 +582,6 @@ const checkOpenGraphTags = () => {
 
   // SSL Enabled
   if (keyPoints.ssl) {
-    score = scorePerSuccess + score;
     document.getElementById("site-ssl").classList.add("success-mark")
     document.getElementById("site-ssl").innerHTML = "Greate, Your website has SSL enabled.";
   } else {
@@ -641,20 +590,20 @@ const checkOpenGraphTags = () => {
   }
   
 
-
+  document.getElementById("score").innerHTML = "Final On page Score: " + (score*100)/5;
 
   
     // Performance Matrix
-    // if(keyPoints.performanceObject) {
-    //   const { performanceObject } = keyPoints;
-    //   document.getElementById("performance-dom-completed").innerHTML = performanceObject.domCompleted + "s";
-    //   document.getElementById("performance-connect-time").innerHTML = performanceObject.connectTime + "s";
-    //   document.getElementById("performance-dom-content").innerHTML = performanceObject.domContentEvent + "s";
-    //   document.getElementById("performance-response-time").innerHTML = performanceObject.responseTime + "s";
-    //   document.getElementById("performance-unload-event").innerHTML = performanceObject.unloadEvent + "s";
-    //   document.getElementById("performance-dom-interactive").innerHTML = performanceObject.domInteractive + "s";
-    //   document.getElementById("performance-redirect-time").innerHTML = performanceObject.redirectTime + "s";
-    // }
+    if(keyPoints.performanceObject) {
+      const { performanceObject } = keyPoints;
+      document.getElementById("performance-dom-completed").innerHTML = performanceObject.domCompleted + "s";
+      document.getElementById("performance-connect-time").innerHTML = performanceObject.connectTime + "s";
+      document.getElementById("performance-dom-content").innerHTML = performanceObject.domContentEvent + "s";
+      document.getElementById("performance-response-time").innerHTML = performanceObject.responseTime + "s";
+      document.getElementById("performance-unload-event").innerHTML = performanceObject.unloadEvent + "s";
+      document.getElementById("performance-dom-interactive").innerHTML = performanceObject.domInteractive + "s";
+      document.getElementById("performance-redirect-time").innerHTML = performanceObject.redirectTime + "s";
+    }
   
     scoreProgressBar(score);
   }

@@ -1,65 +1,73 @@
-/* Reset some default styles */
-/* Navbar Styles */
 .navbar {
-    background-color: #1d4ed8; /* Tailwind blue-700 */
-    padding: 1rem;
+    display: flex;
+    flex-direction: column; /* Stack logo and nav items vertically */
+    align-items: center; /* Center the items horizontally */
+    background-color: #f8f8f8; /* Change this to your desired background color */
 }
 
 .container {
-    max-width: 1280px;
-    margin: 0 auto;
     display: flex;
-    justify-content: space-evenly;
+    flex-direction: column;
     align-items: center;
+    width: 100%;
 }
 
 .logo {
     display: flex;
     align-items: center;
+    margin-bottom: 10px;
+    width: 100%;
+    padding: 15px 0;
+    background-color:#27187E;
 }
 
 .logo-img {
-    height: 2rem;
-    margin-right: 0.5rem;
+    max-width: 100px; /* Adjust size as needed */
+    margin-right: 10px; /* Space between image and text */
 }
 
 .logo-text {
-    color: #ffffff;
-    font-size: 1.5rem;
+    font-size: 1.5em; /* Adjust font size as needed */
     font-weight: bold;
 }
 
 .navbar-menu {
+    width: 100%;
     display: flex;
+    justify-content: center; /* Center the navigation items horizontally */
 }
 
 .navbar-list {
-    list-style: none;
+    list-style-type: none;
+    padding: 0;
     display: flex;
-    gap: 1rem;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    justify-content: space-evenly;
+}
+
+.navbar-item {
+    margin: 5px 0; /* Space between nav items */
 }
 
 .navbar-link {
-    color: #ffffff;
     text-decoration: none;
-    padding: 0.5rem 1rem;
-    border-radius: 0.375rem;
-    transition: background-color 0.3s, color 0.3s;
+    color:#27187E; /* Change this to your desired text color */
+    padding: 10px 15px;
+    border-radius: 5px;
+    transition: transform 0.3s ease;
+}
+.navbar-link:hover {
+    transform: scale(1.2);
 }
 
-.navbar-link:hover, .navbar-link:focus {
-    background-color: #2563eb; /* Tailwind blue-600 */
-    color: #ffffff;
-}
-
-.navbar-link.active {
-    background-color: #1e40af; /* Tailwind blue-800 */
-    color: #ffffff;
-}
 body {
 font-family: Arial, sans-serif;
-background-color: #f7f9fc;
-padding: 20px;
+background-color: #ffff;
+/* background-color: #f7f9fc; */
+padding: 0px;
+margin: 0px;
 min-width: 800px; /* Set your desired minimum width */
 min-height: 500px;/* Set your desired minimum height */
 }
@@ -68,6 +76,7 @@ min-height: 500px;/* Set your desired minimum height */
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
     padding-top: 15px;
+    margin: 10px;
 }
 .grid-item {
     padding: 20px;
@@ -80,7 +89,7 @@ min-height: 500px;/* Set your desired minimum height */
     grid-column: span 2;
 }
 .card-title {
-    background-color: #e5e7eb;
+    background-color: #ffff;
     padding: 10px;
     font-size: 16px;
     font-weight: bold;

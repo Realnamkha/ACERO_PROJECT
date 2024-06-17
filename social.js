@@ -5,26 +5,39 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("Error retrieving Open Graph tags:", chrome.runtime.lastError.message);
         } else {
             console.log("Open Graph tags retrieved successfully:", response);
-            displayOpenGraphTags(response);
+            displayOpenGraphData(response);
         }
     });
   });
 
 
-  function displayOpenGraphTags(openGraphData) {
-    const openGraphContainer = document.querySelector('.open-graph-container');
-    // Loop through the Open Graph data and create meta tags
-    Object.entries(openGraphData).forEach(([property, content]) => {
-        // Create meta tag
-        const metaTag = document.createElement('meta');
-        if (property.startsWith('og:') || property.startsWith('twitter:')) {
-            metaTag.setAttribute('property', property.startsWith('og:') ? property : `twitter:${property.substring(8)}`);
-            metaTag.setAttribute('content', content);
-            // Append meta tag to container
-            openGraphContainer.appendChild(metaTag);
-        }
-    });
-}
+  const displayOpenGraphData = (openGraphData) => {
+    const container = document.querySelector('.open-graph-container');
+  
+    // Clear any existing content
+    container.innerHTML = '';
+  
+    // Loop through the Open Graph data and create a list of items
+    for (const [property, content] of Object.entries(openGraphData)) {
+      const item = document.createElement('p');
+      item.style.margin = '5px 0';
+      item.style.color = '#27187E';
+  
+      const propertySpan = document.createElement('span');
+      propertySpan.style.fontWeight = 'bold';
+      propertySpan.textContent = `${property}: `;
+  
+      const contentSpan = document.createElement('span');
+      contentSpan.textContent = content;
+  
+      item.appendChild(propertySpan);
+      item.appendChild(contentSpan);
+      container.appendChild(item);
+    }
+};
+
+  
+  
 
 
   

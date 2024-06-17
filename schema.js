@@ -10,26 +10,66 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+
 const displaySchemaDetails = (schemas) => {
-    const container = document.getElementById('schema-details');
-  
-    schemas.forEach(schema => {
-      const schemaElement = document.createElement('div');
-      schemaElement.classList.add('schema');
-  
-      const schemaDetails = JSON.stringify(schema, null, 2).replace(/(\\n)/g, '<br>');
-  
-      schemaElement.innerHTML = `
-        <pre>${schemaDetails}</pre>
-      `;
-  
-      container.appendChild(schemaElement);
-    });
+  const container = document.getElementById('schema-details');
+  container.innerHTML = ''; // Clear any existing content
+
+  const createSchemaElement = (schema, level = 0) => {
+    const schemaElement = document.createElement('div');
+    schemaElement.style.marginLeft = `${level * 20}px`;
+
+    for (const key in schema) {
+      if (schema.hasOwnProperty(key)) {
+        const value = schema[key];
+
+        if (typeof value === 'object' && value !== null) {
+          // If the value is an object, recursively create nested schema elements
+          const itemElement = createSchemaElement(value, level + 1);
+          schemaElement.appendChild(itemElement);
+        } else {
+          // Otherwise, display the key-value pair
+          const pairElement = document.createElement('div');
+          pairElement.classList.add('schema-pair');
+          // pairElement.style.marginLeft = `${level * 20}px`; // Indent key-value pair
+          pairElement.innerHTML = `<span class="schema-key">${key}:</span> <span class="schema-value">${value}</span>`;
+          // pairElement.style.borderBottom = '1px solid #ccc';
+          schemaElement.appendChild(pairElement);
+          schemaElement.appendChild(document.createElement('hr'));
+        }
+      }
+    }
+
+    return schemaElement;
   };
 
-// function displaySchemaDetails(schema) {
-//     console.log(schema)
-// }
+  schemas.forEach(schema => {
+    const schemaItem = createSchemaElement(schema);
+    container.appendChild(schemaItem);
+  });
+};
+
+
+
+
+
+
+// const displaySchemaDetails = (schemas) => {
+//     const container = document.getElementById('schema-details');
+  
+//     schemas.forEach(schema => {
+//       const schemaElement = document.createElement('div');
+//       schemaElement.classList.add('schema');
+  
+//       const schemaDetails = JSON.stringify(schema, null, 2).replace(/(\\n)/g, '<br>');
+  
+//       schemaElement.innerHTML = `
+//         <pre>${schemaDetails}</pre>
+//       `;
+  
+//       container.appendChild(schemaElement);
+//     });
+//   };
 
 // function displaySchemaDetails(schema) {
 //     // Get the container element where the schema details will be displayed
