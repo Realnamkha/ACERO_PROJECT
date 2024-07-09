@@ -26,13 +26,13 @@ function displayImages(images) {
         const imgTitleElement = document.createElement('div');
         imgTitleElement.classList.add('col-6', 'card-value');
         imgTitleElement.textContent = `Image ${index + 1}: ${image.src}`;
-        imgTitleElement.style.color = "#27187E"
+        imgTitleElement.style.color = "black";
 
         // Create image size element
         const imgSizeElement = document.createElement('div');
         imgSizeElement.classList.add('col-6', 'card-value');
         imgSizeElement.textContent = `Size: ${image.size}`;
-        imgSizeElement.style.color = "#27187E"
+        imgSizeElement.style.color = "black";
 
         // Append image title and image size elements to inner container
         innerContainer.appendChild(imgTitleElement);

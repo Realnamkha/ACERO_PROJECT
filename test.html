@@ -3,110 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Employee Form</title>
+    <title>Document</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 50px;
-        }
-        .form-container {
-            max-width: 400px;
-            margin: auto;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-        }
-        .form-group input {
-            width: 100%;
-            padding: 8px;
-            box-sizing: border-box;
-        }
-        .form-group .options {
-            display: flex;
-            justify-content: space-between;
-        }
-        .form-group .options label {
-            display: inline-block;
-            margin-right: 10px;
-        }
-        .submit-btn {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        .submit-btn:hover {
-            background-color: #45a049;
-        }
-    </style>
+.modal {
+  display: none; 
+  position: fixed; 
+  z-index: 1; 
+  padding-top: 100px; 
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto; 
+  background-color: rgb(0,0,0); 
+  background-color: rgba(0,0,0,0.4); 
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+}
+
+.close-button {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close-button:hover,
+.close-button:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+</style>
 </head>
 <body>
-
-<div class="form-container">
-    <form action="insert_data.php" method="post">
-        <div class="form-group">
-            <label for="firstname">First Name:</label>
-            <input type="text" id="firstname" name="firstname" required>
+    asa
+    <div id="welcome-modal" class="modal">
+        <div class="modal-content">
+          <span class="close-button">&times;</span>
+          <p>Welcome! Use this extension to take notes.</p>
         </div>
-        <div class="form-group">
-            <label for="lastname">Last Name:</label>
-            <input type="text" id="lastname" name="lastname" required>
-        </div>
-        <div class="form-group">
-            <label for="address">Address:</label>
-            <input type="text" id="address" name="address" required>
-        </div>
-        <div class="form-group">
-            <label for="post">Post:</label>
-            <input type="text" id="post" name="post" required>
-        </div>
-        <div class="form-group">
-            <label for="contact">Contact:</label>
-            <input type="text" id="contact" name="contact" required>
-        </div>
-        <div class="form-group">
-            <label for="gender">Gender:</label>
-            <div class="options">
-                <label>
-                    <input type="radio" name="gender" value="male" required> Male
-                </label>
-                <label>
-                    <input type="radio" name="gender" value="female" required> Female
-                </label>
-                <label>
-                    <input type="radio" name="gender" value="other" required> Other
-                </label>
-            </div>
-        </div>
-        <div class="form-group">
-            <label for="skills">Skills:</label>
-            <div class="options">
-                <label>
-                    <input type="checkbox" name="skills[]" value="PHP"> PHP
-                </label>
-                <label>
-                    <input type="checkbox" name="skills[]" value="JavaScript"> JavaScript
-                </label>
-                <label>
-                    <input type="checkbox" name="skills[]" value="HTML"> HTML
-                </label>
-                <label>
-                    <input type="checkbox" name="skills[]" value="CSS"> CSS
-                </label>
-            </div>
-        </div>
-        <button type="submit" class="submit-btn">Submit</button>
-    </form>
-</div>
-
+      </div>
+      
 </body>
 </html>
+  

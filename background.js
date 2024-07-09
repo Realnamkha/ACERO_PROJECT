@@ -5,6 +5,12 @@ let imagesData = {};
 let keywordsData = {}; 
 let schema = {};
 let openGraphData = {}; // New variable for Open Graph data
+// let notesData = [];
+
+// chrome.storage.local.get(['notes'], function(result) {
+//   notesData = result.notes || [];
+//   console.log("Notes loaded from local storage:", notesData);
+// });
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   console.log(message.method)
@@ -68,11 +74,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       break;
     case "getSchema":
         // Respond to image.js with the stored schema data
-        if (Object.keys(schema).length > 0) {
+        if (Object.keys(schema)) {
           sendResponse(schema);
           console.log("Schema data sent to image.js:", schema);
-        } else {
-          console.error("Error: Schema data not available.");
         }
         break;
     case "getOpenGraph": // New case for responding to opengraph.js

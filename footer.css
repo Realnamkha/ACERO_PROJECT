@@ -4,14 +4,24 @@
     box-sizing: border-box;
 }
 .footerBottom{
-    background-color:#27187E;
+    position: static;
+    background-color:#231F21;
     padding: 20px;
     text-align: center;
 }
 .footerBottom p{
     color: white;
+    padding: 5px;
+    font-size: 13px;
+}
+.footerBottom a{
+    color: white;
+    font-size: 15px;
 }
 @media (max-width: 700px){
+    .footerBottom{
+        position:sticky;
+    }
     .footerNav ul{
         flex-direction: column;
     } 

@@ -277,22 +277,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const getNoindexTag = () => {
     try {
-      let robotsTagExists = document.getElementsByTagName('meta').robots.content
-      if(robotsTagExists) {
-        let included = content.includes('noindex');
-
-        if(included) {
-          return true
-        } else {
-          return false
+      // Get all meta tags
+      let metaTags = document.getElementsByTagName('meta');
+      
+      // Iterate over meta tags to find the one with name="robots"
+      for (let i = 0; i < metaTags.length; i++) {
+        if (metaTags[i].getAttribute('name') === 'robots') {
+          let content = metaTags[i].getAttribute('content');
+          
+          // Check if 'noindex' is included in the content
+          if (content.includes('noindex')) {
+            return true;
+          } else {
+            return false;
+          }
         }
-      } else {
-        return false
       }
-    } catch(error) {
-      return false
-    } 
+      
+      // Return false if no 'robots' meta tag found
+      return false;
+    } catch (error) {
+      return false;
+    }
   }
+  
 
   const getSSL = () => {
     try {
@@ -404,9 +412,10 @@ const checkOpenGraphTags = () => {
 };
 
 
+
+
   
-  
-  // Call the listSchemas function
+
   listSchemas();
   checkOpenGraphTags();
   
@@ -574,10 +583,10 @@ if (keyPoints.links) {
   // NoIndex Tag
   if (!keyPoints.noindexTag) {
     document.getElementById("site-noindex").classList.add("success-mark");
-    document.getElementById("site-noindex").innerHTML = "Your page is not using the Noindex Tag which prevents indexing.";
+    document.getElementById("site-noindex").innerHTML = "Success: Your page is not using the 'noindex' tag, which means search engines will index your page.";
   } else {
     document.getElementById("site-noindex").classList.add("error-mark");
-    document.getElementById("site-noindex").innerHTML = "Your page is using the Noindex Tag which prevents indexing.";
+    document.getElementById("site-noindex").innerHTML = "Warning: Your page is using the 'noindex' tag, which prevents search engines from indexing your page.";
   }
 
   // SSL Enabled

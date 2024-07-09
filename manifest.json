@@ -1,8 +1,8 @@
 {
-    "name": "ACERO",
-    "version": "2.0",
+    "name": "LegalSEO Booster",
+    "version": "1.0",
     "manifest_version": 3,
-    "description": "Acero_SEO - An extension to help you to improve you on page seo",
+    "description": "Analyse and boost your law firm's SEO with this tool. Get valuable insights at the click of a button and take notes while you browse the web. Built for lawyers by legal marketing experts.",
     "permissions": ["scripting",
     "activeTab",
     "storage",
@@ -14,10 +14,10 @@
       "service_worker": "background.js"
     },
     "action": {
-      "default_title": "ACERO",
+      "default_title": "Solicitors_Marketing",
       "default_popup": "popup.html",
       "default_icon": {
-        "32": "/assets/logo3.png"
+        "32": "/assets/logo2.png"
       }
     },
     "icons": {

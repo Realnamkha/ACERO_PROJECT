@@ -15,6 +15,16 @@ const displaySchemaDetails = (schemas) => {
   const container = document.getElementById('schema-details');
   container.innerHTML = ''; // Clear any existing content
 
+  if (schemas.length === 0) {
+    const noSchemaMessage = document.createElement('div');
+    noSchemaMessage.textContent = 'No schema present';
+    noSchemaMessage.style.textAlign = 'center';
+    noSchemaMessage.style.fontStyle = 'italic';
+    noSchemaMessage.style.color = '#888';
+    container.appendChild(noSchemaMessage);
+    return;
+  }
+
   const createSchemaElement = (schema, level = 0) => {
     const schemaElement = document.createElement('div');
     schemaElement.style.marginLeft = `${level * 20}px`;

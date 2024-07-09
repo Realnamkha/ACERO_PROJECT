@@ -17,11 +17,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Clear any existing content
     container.innerHTML = '';
   
+    // Add a title
+  
     // Loop through the Open Graph data and create a list of items
     for (const [property, content] of Object.entries(openGraphData)) {
       const item = document.createElement('p');
       item.style.margin = '5px 0';
-      item.style.color = '#27187E';
+      item.style.color = 'black';
   
       const propertySpan = document.createElement('span');
       propertySpan.style.fontWeight = 'bold';
@@ -34,7 +36,8 @@ document.addEventListener('DOMContentLoaded', () => {
       item.appendChild(contentSpan);
       container.appendChild(item);
     }
-};
+  };
+  
 
   
   
