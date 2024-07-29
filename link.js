@@ -63,7 +63,7 @@ function displayLinks(links) {
 
             const count = document.createElement('span');
             count.textContent = ` Count: ${linkCounts[link].count}`;
-            linkContainer.appendChild(count);
+            // linkContainer.appendChild(count);
 
             listContainer.appendChild(linkContainer);
         });
